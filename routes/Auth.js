@@ -9,6 +9,10 @@
 
   //Route 1: Create a user using: POST "/api/auth/create". doesn't require auth
 
+  router.get('/new',(req, res)=>{
+    res.send("working fine")
+  })
+
   router.post('/create', [
     body('email','please enter valid email').isEmail(),
     body('name', 'enter a valid name').isLength({ min: 3 }),
