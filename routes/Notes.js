@@ -17,18 +17,18 @@ router.get('/fetchallnotes', fetchuser, async (req, res) => {
 
 // Route 2: Add notes using POST "api/notes/addnotes"
 router.post('/addnotes', fetchuser, [
-    body('title', 'Please enter a title').isLength({ min: 3 }),
+    body('tittle', 'Please enter a tittle').isLength({ min: 3 }),
     body('description', 'Please enter description').isLength({ min: 5 }),
     body('tag').isLength({ min: 5 })
 ], async (req, res) => {
     try {
-        const { title, description, tag } = req.body;
+        const { tittle, description, tag } = req.body;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
         const note = new Note({
-            title,
+            tittle,
             description,
             tag,
             user: req.user.id
