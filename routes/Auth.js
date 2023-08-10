@@ -6,7 +6,7 @@
   const router = express.Router();
   const fetchuser = require('../middleware/fetchuser')
   const JWT_SECRET = "a0f9c6d3b0f8c9a5f6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9";
-
+  const success = true
   //Route 1: Create a user using: POST "/api/auth/create". doesn't require auth
 
   router.get('/new',(req, res)=>{
@@ -40,10 +40,11 @@
         }
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json({ authToken });
+      res.json({ success,authToken });
     } catch (error) {
+      success = false
       console.error(error.message);
-      res.status(500).json({ error: "Error creating user" }); // Return an appropriate error message
+      res.status(500).json({success, error: "Error creating user" }); // Return an appropriate error message
     }
   });
   
@@ -64,13 +65,15 @@
     try {
       let user = await User.findOne({ email }); // await the findOne() method
       if (!user) { // Correctly use 'user' instead of 'User'
-        return res.status(400).json({ error: "Please login with correct credentials" });
+        success = false
+        return res.status(400).json({success, error: "Please login with correct credentials" });
       } 
   
       const passwordCompare = await bcrypt.compare(password, user.password); // await the bcrypt.compare()
   
       if (!passwordCompare) {
-        return res.status(400).json({ error: "Please login with correct credentials" });
+        success = false
+        return res.status(400).json({success, error: "Please login with correct credentials" });
       }
   
       const data = {
@@ -79,10 +82,11 @@
         }
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json(authToken);
+      res.json(success,authToken);
     } catch (error) {
+      success = false
       console.error(error.message);
-      res.status(500).json({ error: "Error logging in" }); // Return an appropriate error message
+      res.status(500).json({success, error: "Error logging in" }); // Return an appropriate error message
     }
   });
 
@@ -93,9 +97,10 @@
   try{
     userId= req.user.id
     let user = await User.findById(userId).select("-password")
-    res.send(user)
+    res.send(success,user)
   }catch(error){
-    console.error(error.message)
+    success = false
+    console.error(success,error.message)
     res.status(500).send("internal server error")
   }
 })
