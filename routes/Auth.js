@@ -18,9 +18,10 @@
     body('name', 'enter a valid name').isLength({ min: 3 }),
     body('password').isLength({ min: 5 })
   ], async (req, res) => {
+    success=false
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({success, errors: errors.array() });
     } 
   
     try {
@@ -40,11 +41,10 @@
         }
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json({ success,authToken });
+      res.json({"success" : "true" ,"authToken":authToken});
     } catch (error) {
-      success = false
-      console.error(error.message);
-      res.status(500).json({success, error: "Error creating user" }); // Return an appropriate error message
+      console.error(success, error.message);
+      res.status(500).json({success,error: "Error creating user" }); // Return an appropriate error message
     }
   });
   
@@ -55,9 +55,10 @@
     body('email', 'Enter valid email').isEmail(),
     body('password', 'Please enter password').exists(),
   ], async (req, res) => {
+    success=false
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({success, errors: errors.array() });
     } 
   
     const { email, password } = req.body; // Destructure the email and password from the request body
@@ -65,15 +66,13 @@
     try {
       let user = await User.findOne({ email }); // await the findOne() method
       if (!user) { // Correctly use 'user' instead of 'User'
-        success = false
-        return res.status(400).json({success, error: "Please login with correct credentials" });
+        return res.status(400).json({success,error: "Please login with correct credentials" });
       } 
   
       const passwordCompare = await bcrypt.compare(password, user.password); // await the bcrypt.compare()
   
       if (!passwordCompare) {
-        success = false
-        return res.status(400).json({success, error: "Please login with correct credentials" });
+        return res.status(400).json({success,error: "Please login with correct credentials" });
       }
   
       const data = {
@@ -82,11 +81,10 @@
         }
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json(authToken);
+      res.json({"success" : true ,"authToken":authToken});
     } catch (error) {
-      success = false
-      console.error(error.message);
-      res.status(500).json({success, error: "Error logging in" }); // Return an appropriate error message
+      console.error(success,error.message);
+      res.status(500).json({success,error: "Error logging in" }); // Return an appropriate error message
     }
   });
 
@@ -97,10 +95,9 @@
   try{
     userId= req.user.id
     let user = await User.findById(userId).select("-password")
-    res.send(success,user)
+    res.send(user)
   }catch(error){
-    success = false
-    console.error(success,error.message)
+    console.error(error.message)
     res.status(500).send("internal server error")
   }
 })
